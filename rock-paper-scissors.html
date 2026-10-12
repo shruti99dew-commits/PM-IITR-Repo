@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#edf5ee">
+    <title>Rock Paper Scissors</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #19312e;
+            --muted: #657773;
+            --page: #edf5ee;
+            --paper: #fffefa;
+            --line: #d5e2d9;
+            --coral: #e86450;
+            --coral-dark: #c64a39;
+            --sun: #f2cf5b;
+            --mint: #cfe9d8;
+            --shadow: 0 18px 48px rgba(35, 71, 59, .12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            background-color: var(--page);
+            background-image: radial-gradient(rgba(32, 74, 60, .09) .8px, transparent .8px);
+            background-size: 19px 19px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        }
+
+        button {
+            color: inherit;
+            font: inherit;
+        }
+
+        .game-shell {
+            width: min(100% - 36px, 880px);
+            margin: 0 auto;
+            padding: 32px 0 40px;
+            animation: arrive .45s ease-out both;
+        }
+
+        .masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--ink);
+            font-size: .8rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 30px;
+            aspect-ratio: 1;
+            place-items: center;
+            border: 1px solid var(--ink);
+            border-radius: 50%;
+            background: var(--sun);
+            font-family: Georgia, serif;
+            font-size: 1rem;
+        }
+
+        .match-rule {
+            margin: 0;
+            color: var(--muted);
+            font-size: .88rem;
+            text-align: right;
+        }
+
+        .intro {
+            margin-bottom: 23px;
+        }
+
+        .eyebrow {
+            margin: 0 0 6px;
+            color: var(--coral-dark);
+            font-size: .75rem;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 4.6rem;
+            font-weight: 700;
+            line-height: .98;
+        }
+
+        h1 span {
+            color: var(--coral);
+            font-style: italic;
+        }
+
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 18px;
+            min-height: 104px;
+            margin-bottom: 18px;
+            padding: 18px 24px;
+            border-radius: 8px;
+            background: var(--ink);
+            color: #fffefa;
+        }
+
+        .score-side:last-child {
+            text-align: right;
+        }
+
+        .score-name {
+            display: block;
+            color: #c1d0c8;
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            display: block;
+            margin-top: 2px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 2.25rem;
+            line-height: 1;
+        }
+
+        .score-divider {
+            color: var(--sun);
+            font-family: Georgia, serif;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .tie-count {
+            margin: -5px 0 18px;
+            color: var(--muted);
+            font-size: .82rem;
+            text-align: center;
+        }
+
+        .arena {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 16px;
+            min-height: 218px;
+            padding: 25px clamp(14px, 5vw, 42px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            box-shadow: var(--shadow);
+        }
+
+        .contestant {
+            min-width: 0;
+            text-align: center;
+        }
+
+        .contestant-label {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        .hand-tile {
+            display: grid;
+            width: min(100%, 132px);
+            aspect-ratio: 1;
+            margin: 0 auto 9px;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #f4f8f2;
+        }
+
+        .hand-glyph {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+            font-size: 5.4rem;
+            line-height: 1;
+        }
+
+        .choice-name {
+            min-height: 1.25em;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .versus {
+            color: var(--coral);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.15rem;
+            font-style: italic;
+        }
+
+        .result-line {
+            min-height: 1.6em;
+            margin: 18px 0 21px;
+            color: var(--ink);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .choice-heading {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .choice-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .choice-button {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: 11px;
+            min-height: 76px;
+            padding: 12px 17px;
+            border: 1px solid #d7e3da;
+            border-radius: 8px;
+            background: var(--paper);
+            box-shadow: 0 3px 0 #d7e3da;
+            cursor: pointer;
+            text-align: left;
+            transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, background-color .14s ease;
+        }
+
+        .choice-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--coral);
+            box-shadow: 0 5px 0 var(--coral);
+        }
+
+        .choice-button:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 var(--coral);
+        }
+
+        .choice-button:focus-visible,
+        .new-match:focus-visible {
+            outline: 3px solid var(--coral);
+            outline-offset: 4px;
+        }
+
+        .choice-button:disabled {
+            cursor: not-allowed;
+            opacity: .55;
+        }
+
+        .choice-icon {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .choice-copy strong,
+        .choice-copy small {
+            display: block;
+        }
+
+        .choice-copy strong {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1rem;
+        }
+
+        .choice-copy small {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: .7rem;
+        }
+
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 22px;
+        }
+
+        .status-note {
+            margin: 0;
+            color: var(--muted);
+            font-size: .8rem;
+        }
+
+        .new-match {
+            min-height: 44px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--coral);
+            color: white;
+            cursor: pointer;
+            font-size: .86rem;
+            font-weight: 800;
+            transition: background-color .14s ease, transform .14s ease;
+        }
+
+        .new-match:hover {
+            transform: translateY(-1px);
+            background: var(--coral-dark);
+        }
+
+        .new-match:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes arrive {
+            from { opacity: 0; transform: translateY(9px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .game-shell {
+                width: min(100% - 28px, 480px);
+                padding-top: 21px;
+            }
+
+            h1 {
+                font-size: 2.6rem;
+            }
+
+            .masthead {
+                align-items: flex-start;
+                margin-bottom: 27px;
+            }
+
+            .match-rule {
+                max-width: 122px;
+                line-height: 1.35;
+            }
+
+            .scoreboard {
+                min-height: 88px;
+                padding: 15px 18px;
+            }
+
+            .arena {
+                min-height: 184px;
+                gap: 8px;
+                padding: 18px 10px;
+            }
+
+            .hand-tile {
+                width: min(100%, 104px);
+            }
+
+            .hand-glyph {
+                font-size: 3.5rem;
+            }
+
+            .result-line {
+                font-size: 1.15rem;
+            }
+
+            .choice-row {
+                gap: 8px;
+            }
+
+            .choice-button {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 5px;
+                min-height: 86px;
+                padding: 9px 5px;
+                text-align: center;
+            }
+
+            .choice-copy small {
+                display: none;
+            }
+
+            .bottom-row {
+                align-items: flex-start;
+            }
+
+            .status-note {
+                max-width: 58%;
+                line-height: 1.4;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-shell">
+        <header class="masthead">
+            <div class="brand"><span class="brand-mark" aria-hidden="true">R</span> Pocket Arcade</div>
+            <p class="match-rule">First to 3 round wins takes the match.</p>
+        </header>
+
+        <section class="intro" aria-labelledby="game-title">
+            <p class="eyebrow">A classic showdown</p>
+            <h1 id="game-title">Rock <span>Paper</span><br>Scissors</h1>
+        </section>
+
+        <section class="scoreboard" aria-label="Match score">
+            <div class="score-side">
+                <span class="score-name">You</span>
+                <output class="score-value" id="player-score" aria-label="Your wins">0</output>
+            </div>
+            <span class="score-divider" aria-hidden="true">score</span>
+            <div class="score-side">
+                <span class="score-name">Computer</span>
+                <output class="score-value" id="computer-score" aria-label="Computer wins">0</output>
+            </div>
+        </section>
+        <p class="tie-count">Ties <output id="tie-count">0</output></p>
+
+        <section class="arena" aria-label="Round choices">
+            <div class="contestant">
+                <p class="contestant-label">You picked</p>
+                <div class="hand-tile"><span class="hand-glyph" id="player-hand" aria-hidden="true">?</span></div>
+                <p class="choice-name" id="player-choice">Ready</p>
+            </div>
+            <span class="versus" aria-hidden="true">versus</span>
+            <div class="contestant">
+                <p class="contestant-label">Computer picked</p>
+                <div class="hand-tile"><span class="hand-glyph" id="computer-hand" aria-hidden="true">?</span></div>
+                <p class="choice-name" id="computer-choice">Ready</p>
+            </div>
+        </section>
+
+        <p class="result-line" id="round-result" aria-live="polite" aria-atomic="true">Choose your move to start.</p>
+
+        <section aria-labelledby="choice-heading">
+            <h2 class="choice-heading" id="choice-heading">Make your move</h2>
+            <div class="choice-row">
+                <button class="choice-button" type="button" data-choice="rock" aria-label="Choose rock">
+                    <span class="choice-icon" aria-hidden="true">✊</span>
+                    <span class="choice-copy"><strong>Rock</strong><small>Strong and steady</small></span>
+                </button>
+                <button class="choice-button" type="button" data-choice="paper" aria-label="Choose paper">
+                    <span class="choice-icon" aria-hidden="true">✋</span>
+                    <span class="choice-copy"><strong>Paper</strong><small>Cover the rock</small></span>
+                </button>
+                <button class="choice-button" type="button" data-choice="scissors" aria-label="Choose scissors">
+                    <span class="choice-icon" aria-hidden="true">✌️</span>
+                    <span class="choice-copy"><strong>Scissors</strong><small>Cut the paper</small></span>
+                </button>
+            </div>
+        </section>
+
+        <footer class="bottom-row">
+            <p class="status-note" id="match-status">Ready when you are.</p>
+            <button class="new-match" id="new-match" type="button">New match</button>
+        </footer>
+    </main>
+
+    <script>
+        const choices = {
+            rock: { icon: '✊', label: 'Rock' },
+            paper: { icon: '✋', label: 'Paper' },
+            scissors: { icon: '✌️', label: 'Scissors' }
+        };
+
+        const state = {
+            playerWins: 0,
+            computerWins: 0,
+            ties: 0,
+            finished: false
+        };
+
+        const elements = {
+            playerScore: document.querySelector('#player-score'),
+            computerScore: document.querySelector('#computer-score'),
+            tieCount: document.querySelector('#tie-count'),
+            playerHand: document.querySelector('#player-hand'),
+            computerHand: document.querySelector('#computer-hand'),
+            playerChoice: document.querySelector('#player-choice'),
+            computerChoice: document.querySelector('#computer-choice'),
+            roundResult: document.querySelector('#round-result'),
+            matchStatus: document.querySelector('#match-status'),
+            choiceButtons: document.querySelectorAll('[data-choice]')
+        };
+
+        function getOutcome(player, computer) {
+            if (player === computer) return 'tie';
+            if (
+                (player === 'rock' && computer === 'scissors') ||
+                (player === 'paper' && computer === 'rock') ||
+                (player === 'scissors' && computer === 'paper')
+            ) return 'player';
+            return 'computer';
+        }
+
+        function updateScore() {
+            elements.playerScore.value = state.playerWins;
+            elements.playerScore.textContent = state.playerWins;
+            elements.computerScore.value = state.computerWins;
+            elements.computerScore.textContent = state.computerWins;
+            elements.tieCount.value = state.ties;
+            elements.tieCount.textContent = state.ties;
+        }
+
+        function setChoice(side, choice) {
+            const item = choices[choice];
+            elements[`${side}Hand`].textContent = item.icon;
+            elements[`${side}Choice`].textContent = item.label;
+        }
+
+        function finishMatch(winner) {
+            state.finished = true;
+            elements.choiceButtons.forEach((button) => {
+                button.disabled = true;
+            });
+            elements.matchStatus.textContent = winner === 'player'
+                ? 'You won the match. Ready for a rematch?'
+                : 'Computer won the match. Try again?';
+        }
+
+        function playRound(playerChoice) {
+            if (state.finished) return;
+
+            const computerChoice = Object.keys(choices)[Math.floor(Math.random() * 3)];
+            const outcome = getOutcome(playerChoice, computerChoice);
+
+            setChoice('player', playerChoice);
+            setChoice('computer', computerChoice);
+
+            if (outcome === 'tie') {
+                state.ties++;
+                elements.roundResult.textContent = 'A tie. No points this round.';
+            } else if (outcome === 'player') {
+                state.playerWins++;
+                elements.roundResult.textContent = `${choices[playerChoice].label} beats ${choices[computerChoice].label}. You win this round!`;
+            } else {
+                state.computerWins++;
+                elements.roundResult.textContent = `${choices[computerChoice].label} beats ${choices[playerChoice].label}. Computer wins this round.`;
+            }
+
+            updateScore();
+
+            if (state.playerWins === 3) {
+                finishMatch('player');
+            } else if (state.computerWins === 3) {
+                finishMatch('computer');
+            } else {
+                elements.matchStatus.textContent = 'First to 3 wins the match.';
+            }
+        }
+
+        function newMatch() {
+            state.playerWins = 0;
+            state.computerWins = 0;
+            state.ties = 0;
+            state.finished = false;
+            elements.playerHand.textContent = '?';
+            elements.computerHand.textContent = '?';
+            elements.playerChoice.textContent = 'Ready';
+            elements.computerChoice.textContent = 'Ready';
+            elements.roundResult.textContent = 'Choose your move to start.';
+            elements.matchStatus.textContent = 'Ready when you are.';
+            elements.choiceButtons.forEach((button) => {
+                button.disabled = false;
+            });
+            updateScore();
+        }
+
+        elements.choiceButtons.forEach((button) => {
+            button.addEventListener('click', () => playRound(button.dataset.choice));
+        });
+
+        document.querySelector('#new-match').addEventListener('click', newMatch);
+        updateScore();
+    </script>
+</body>
+</html>
