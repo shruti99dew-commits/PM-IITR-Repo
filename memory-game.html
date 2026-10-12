@@ -12,7 +12,24 @@
             --card-back: #1976d2;
             --card-front: #ffffff;
             --text-color: #333333;
+            --surface-color: #ffffff;
+            --button-hover-color: #1565c0;
+            --button-active-color: #0d47a1;
+            --modal-backdrop: rgba(0, 0, 0, 0.5);
             --success-color: #4caf50;
+        }
+
+        body[data-theme="dark"] {
+            --primary-color: #4ea1f3;
+            --background-color: #151a22;
+            --card-back: #245f9e;
+            --card-front: #283342;
+            --text-color: #f1f5f9;
+            --surface-color: #202936;
+            --button-hover-color: #347fc5;
+            --button-active-color: #2465a5;
+            --modal-backdrop: rgba(0, 0, 0, 0.72);
+            --success-color: #73d28b;
         }
 
         * {
@@ -54,7 +71,7 @@
             justify-content: space-around;
             flex-wrap: wrap;
             gap: 1rem;
-            background: white;
+            background: var(--surface-color);
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -88,11 +105,11 @@
         }
 
         button:hover {
-            background-color: #1565c0;
+            background-color: var(--button-hover-color);
         }
 
         button.active {
-            background-color: #0d47a1;
+            background-color: var(--button-active-color);
         }
 
         /* Game grid styles with responsive layout */
@@ -167,13 +184,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: var(--modal-backdrop);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: white;
+            background: var(--surface-color);
             padding: 2rem;
             border-radius: 8px;
             text-align: center;
@@ -190,7 +207,7 @@
         .scores-list {
             max-width: 600px;
             margin: 1rem auto;
-            background: white;
+            background: var(--surface-color);
             padding: 1rem;
             border-radius: 8px;
         }
@@ -233,6 +250,10 @@
             <div class="stat">
                 <h2>Rating</h2>
                 <p class="stat-value rating" aria-live="polite">★★★</p>
+            </div>
+            <div class="stat theme-control">
+                <h2>Theme</h2>
+                <button class="theme-btn" id="theme-toggle" type="button" aria-pressed="false">Dark theme: Off</button>
             </div>
         </div>
 
@@ -283,11 +304,50 @@
             moves: document.querySelector('.moves'),
             timer: document.querySelector('.timer'),
             rating: document.querySelector('.rating'),
+            themeToggle: document.querySelector('#theme-toggle'),
             modal: document.querySelector('.modal'),
             finalStats: document.querySelector('.final-stats'),
             gridButtons: document.querySelectorAll('.grid-btn'),
             scoresList: document.querySelector('.scores-list')
         };
+
+        const THEME_STORAGE_KEY = 'memoryGameTheme';
+
+        function applyTheme(theme, persist = false) {
+            const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+            document.body.dataset.theme = selectedTheme;
+            elements.themeToggle.setAttribute('aria-pressed', String(selectedTheme === 'dark'));
+            elements.themeToggle.textContent = `Dark theme: ${selectedTheme === 'dark' ? 'On' : 'Off'}`;
+
+            if (persist) {
+                try {
+                    localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
+                } catch (error) {}
+            }
+        }
+
+        function getSavedTheme() {
+            try {
+                return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+            } catch (error) {
+                return 'light';
+            }
+        }
+
+        function getSavedScores() {
+            try {
+                const scores = JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+                return Array.isArray(scores) ? scores : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveScores(scores) {
+            try {
+                localStorage.setItem('memoryGameScores', JSON.stringify(scores));
+            } catch (error) {}
+        }
 
         // Card symbols (emojis) for both grid sizes
         const symbols = {
@@ -397,10 +457,10 @@
                     date: new Date().toISOString()
                 };
                 
-                const scores = JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+                const scores = getSavedScores();
                 scores.push(score);
                 scores.sort((a, b) => a.moves - b.moves);
-                localStorage.setItem('memoryGameScores', JSON.stringify(scores.slice(0, 5)));
+                saveScores(scores.slice(0, 5));
                 
                 // Show win modal
                 elements.finalStats.textContent = `
@@ -416,7 +476,7 @@
 
         // Update the display of best scores
         function updateScoresList() {
-            const scores = JSON.parse(localStorage.getItem('memoryGameScores') || '[]');
+            const scores = getSavedScores();
             elements.scoresList.innerHTML = scores.length ? 
                 scores.map((score, index) => `
                     <p>${index + 1}. ${score.gridSize}x${score.gridSize} Grid - 
@@ -482,6 +542,10 @@
             }
         });
 
+        elements.themeToggle.addEventListener('click', () => {
+            applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark', true);
+        });
+
         document.querySelector('.play-again').addEventListener('click', () => {
             elements.modal.style.display = 'none';
             initializeGrid();
@@ -499,6 +563,7 @@
         });
 
         // Initialize game
+        applyTheme(getSavedTheme());
         updateScoresList();
         initializeGrid();
     </script>
